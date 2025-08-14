@@ -109,7 +109,7 @@ steps:
         run: |
           LOG=/tmp/trivy_verbose.log
           
-          $SETUP_PATH/trivy fs --cache-dir=/tmp/trivy/ --format=cyclonedx --license-full --no-progress --scanners vuln --fail . 2>&1
+          $SETUP_PATH/trivy fs --cache-dir=/tmp/trivy/ --format=cyclonedx --license-full --no-progress --scanners vuln --fail . > /tmp/trivy_verbose.log 2>&1
 
           status=$?
 
