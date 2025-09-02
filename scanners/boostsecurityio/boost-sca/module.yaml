@@ -107,19 +107,7 @@ steps:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1,ghcr.io/aquasecurity/trivy-java-db:1
         run: |
-          LOG=/tmp/trivy_verbose.log
-          
-          $SETUP_PATH/trivy fs --cache-dir=/tmp/trivy/ --format=cyclonedx --license-full --no-progress --scanners vuln --fail . > /tmp/trivy_verbose.log 2>&1
-
-          status=$?
-
-          # Always print what Trivy said, even on failure
-          echo "::group::Trivy debug output"
-          cat "$LOG" || true
-          echo "::endgroup::"
-
-          # Propagate the original exit code so the action behaves the same
-          exit "$status"
+          $SETUP_PATH/trivy fs --debug --cache-dir=/tmp/trivy/ --format=cyclonedx --license-full --no-progress --scanners vuln . > /tmp/sca_verbose.log 2>&1
       format: cyclonedx
       post-processor:
         docker:
