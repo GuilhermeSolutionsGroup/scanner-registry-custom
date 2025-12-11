@@ -4,6 +4,7 @@ id: boostsecurityio/trivy-image
 name: Trivy (Image scanning)
 namespace: boostsecurityio/trivy-image
 scan_types:
+  - secrets
   - sca_container
 
 config:
@@ -13,11 +14,11 @@ config:
 setup:
   - name: download trivy
     environment:
-      VERSION: 0.61.0
-      LINUX_X86_64_SHA: 31af7049380abcdc422094638cc33364593f0ccc89c955dd69d27aca288ae79c
-      LINUX_ARM64_SHA: d18a9ec7d408d541182e7f3165cdaa934fd05f586e4f22ce547ed1f1640e8c3f
-      MACOS_X86_64_SHA: 7454cd0d31dec55498baa2fbec9c4034c23ab52df45bb256c29297f2099129f8
-      MACOS_ARM64_SHA: 9ad04f68b7823109b93d3c6b4e069d932348bf2847e4ccd197787f87f346138e
+      VERSION: 0.67.2
+      LINUX_X86_64_SHA: 546511a5514afc813c0b72e4abeea2c16a32228a13a1e5114d927c190e76b1f9
+      LINUX_ARM64_SHA: e4f28390b06cdaaed94f8c49cce2c4c847938b5188aefdeb82453f2e933e57cb
+      MACOS_X86_64_SHA: 4a5b936a8d89b508ecdc6edd65933b6fe3e9a368796cbdf917fd0df393f26542
+      MACOS_ARM64_SHA: 6b3163667f29fc608a2ed647c1bd42023af5779349286148190a168c5b3f28f1
     run: |
       BINARY_URL="https://github.com/aquasecurity/trivy/releases/download/v${VERSION}"
       ARCH=$(uname -m)
@@ -60,13 +61,19 @@ steps:
           TRIVY_ADDITIONAL_ARGS: ${TRIVY_ADDITIONAL_ARGS---ignore-unfixed}
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1,ghcr.io/aquasecurity/trivy-java-db:1
-        run: |
-            $SETUP_PATH/trivy image ${TRIVY_ADDITIONAL_ARGS} --format json --scanners vuln,secret \
-              --quiet ${BOOST_IMAGE_NAME}
+          TRIVY_SCANNERS: vuln,secret
+        run: >
+          $SETUP_PATH/trivy image 
+          ${TRIVY_ADDITIONAL_ARGS} 
+          --format json 
+          --scanners ${TRIVY_SCANNERS}
+          --skip-version-check 
+          --quiet 
+          ${BOOST_IMAGE_NAME}
       format: sarif
       post-processor:
         docker:
-          image: public.ecr.aws/boostsecurityio/boost-scanner-trivy:2925e6e@sha256:0f116f3ae1ccb36cbef4e73d44dde8d376b756b2486757576322a468fa98bdb9
+          image: public.ecr.aws/boostsecurityio/boost-scanner-trivy:b990ceb@sha256:d4871661744790add629604c85b396458e54cec780ac881a5c3e4fa9fd1dde22
           command: process
           workdir: /code
           environment:
